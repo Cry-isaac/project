@@ -1,0 +1,80 @@
+import arcade
+import random
+import math
+
+# Константы
+SCREEN_WIDTH = 1641
+SCREEN_HEIGHT = 601
+SCREEN_TITLE = "mario"
+RESULT_COIN = 0
+
+
+
+class Mario(arcade.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        # Загружаем текстуры для анимации
+        self.textures = []
+        self.textures.append(arcade.load_texture(f"images/jump.jpg"))
+        self.textures.append(arcade.load_texture(f"images/to_stand.png"))
+
+        self.texture = self.textures[1]
+        self.center_x = x
+        self.center_y = y
+        self.scale = 0.3
+
+
+    def update(self, delta_time: float = 1 / 60):
+        pass
+
+
+class MarioGame(arcade.Window):
+    def __init__(self, width, height, title):
+        super().__init__(width, height, title)
+        # Загрузите фоновую текстуру.
+        self.shore = arcade.load_texture('images/mario.png')
+        self.mario = None
+
+    def setup(self):
+        self.mario = arcade.SpriteList()
+        mario = Mario(x=SCREEN_WIDTH//2,
+                      y=SCREEN_HEIGHT//2)
+        self.mario.append(mario)
+
+
+
+    def on_draw(self):
+        self.clear()
+        arcade.draw_texture_rect(self.shore,
+                                 arcade.rect.XYWH(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.mario.draw()
+
+    def on_update(self, delta_time):
+        pass
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        pass
+
+    def on_key_press(self, key, modifiers):
+        if key == arcade.key.SPACE:
+            self.bottom_y += self.velocity
+        elif key == arcade.key.LEFT:
+            self.left_x -= self.velocity
+        elif key == arcade.key.RIGHT:
+            self.left_x += self.velocity
+
+
+
+def setup_game(width=1000, height=600, title="Catching fish"):
+    game = MarioGame(width, height, title)
+    game.setup()
+    return game
+
+
+def main():
+    setup_game()
+    arcade.run()
+
+
+if __name__ == "__main__":
+    main()
