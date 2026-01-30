@@ -9,26 +9,11 @@ SPEED = 2
 
 
 class Player(arcade.Sprite):
-    def __init__(self, n):
+    def __init__(self):
         super().__init__()
-        self.hero = n
 
         # Загрузка текстур для анимации ходьбы
-        self.heros = [[
-            arcade.load_texture(":resources:images/enemies/wormPink.png"),
-            arcade.load_texture(":resources:images/enemies/slimePurple.png")
-        ],
-            [
-                arcade.load_texture(":resources:images/enemies/wormGreen.png"),
-                arcade.load_texture(":resources:images/enemies/wormGreen_move.png")
-            ],
-            [
-                arcade.load_texture(":resources:images/enemies/frog.png"),
-                arcade.load_texture(":resources:images/enemies/frog_move.png")
-            ],
-            [arcade.load_texture("images/MarioStanding.png"),
-             arcade.load_texture("images/MarioJumping.png")]
-        ]
+        self.mario = [arcade.load_texture("images/MarioStanding.png"),arcade.load_texture("images/MarioJumping.png")]
         self.animation_timer = 0
         self.current_texture = 0
 
@@ -42,7 +27,7 @@ class Player(arcade.Sprite):
         if self.animation_timer >= 10:
             self.animation_timer = 0
             self.current_texture = 1 - self.current_texture
-            self.texture = self.heros[self.hero][self.current_texture]
+            self.texture = self.mario[self.current_texture]
 
 
 class MyGUIWindow(arcade.Window):
@@ -55,12 +40,15 @@ class MyGUIWindow(arcade.Window):
 
         # Layout для организации — как полки в шкафу
         self.anchor_layout = UIAnchorLayout(y=self.height // 3)  # Центрирует виджеты
-        self.box_layout = UIBoxLayout(vertical=False, space_between=10)  # Вертикальный стек
+        self.box_layout_v = UIBoxLayout(vertical=True, space_between=10)  # Вертикальный стек
+        self.box_layout_h = UIBoxLayout(vertical=False, space_between=10)
+
 
         # Добавим все виджеты в box, потом box в anchor
         self.setup_widgets()  # Функция ниже
 
-        self.anchor_layout.add(self.box_layout)  # Box в anchor
+        self.box_layout_v.add(self.box_layout_h)
+        self.anchor_layout.add(self.box_layout_v)  # Box в anchor
         self.manager.add(self.anchor_layout)  # Всё в manager
 
         self.all_sprites = arcade.SpriteList()
@@ -76,7 +64,7 @@ class MyGUIWindow(arcade.Window):
                                          texture_pressed=texture_pressed,
                                          scale=1.0)
         texture_button.on_click = self.change_hero
-        self.box_layout.add(texture_button)
+        self.box_layout_v.add(texture_button)
 
         texture_button1 = UITextureButton(text='Green Worm',
                                           texture=texture_normal,
@@ -84,7 +72,7 @@ class MyGUIWindow(arcade.Window):
                                           texture_pressed=texture_pressed,
                                           scale=1.0)
         texture_button1.on_click = self.change_hero1
-        self.box_layout.add(texture_button1)
+        self.box_layout_v.add(texture_button1)
 
         texture_button2 = UITextureButton(text='Frog',
                                           texture=texture_normal,
@@ -92,7 +80,7 @@ class MyGUIWindow(arcade.Window):
                                           texture_pressed=texture_pressed,
                                           scale=1.0)
         texture_button2.on_click = self.change_hero2
-        self.box_layout.add(texture_button2)
+        self.box_layout_v.add(texture_button2)
 
         texture_button3 = UITextureButton(text='Mario',
                                           texture=texture_normal,
@@ -100,11 +88,11 @@ class MyGUIWindow(arcade.Window):
                                           texture_pressed=texture_pressed,
                                           scale=1.0)
         texture_button3.on_click = self.change_hero3
-        self.box_layout.add(texture_button3)
+        self.box_layout_v.add(texture_button3)
 
     def setup(self):
         self.texture = arcade.load_texture(f"images/backgrounds/backgound.webp")
-        self.player = Player(3)
+        self.player = Player()
         self.player.center_x = SCREEN_WIDTH // 6.5
         self.player.center_y = SCREEN_HEIGHT // 6.5
         self.all_sprites.append(self.player)
