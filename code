@@ -1,67 +1,102 @@
 import arcade
 import random
 import math
+import enum
 
 # Константы
 SCREEN_WIDTH = 1641
 SCREEN_HEIGHT = 601
 SCREEN_TITLE = "mario"
 RESULT_COIN = 0
+ANIMATION_SPEED = 0.1
 
+class FaceDirection(enum.Enum):
+    LEFT = 0
+    RIGHT = 1
 
 
 class Mario(arcade.Sprite):
-    def __init__(self, x, y):
+    def __init__(self):
         super().__init__()
         # Загружаем текстуры для анимации
         self.textures = []
-        self.textures.append(arcade.load_texture(f"images/jump.jpg"))
+        self.textures.append(arcade.load_texture(f"mario/images/jump.jpg"))
         self.textures.append(arcade.load_texture(f"images/to_stand.png"))
 
         self.texture = self.textures[1]
-        self.center_x = x
-        self.center_y = y
-        self.scale = 0.3
+        self.center_x = SCREEN_WIDTH / 2
+        self.center_y = SCREEN_HEIGHT / 2
+        self.scale = 1
+        self.speed = 50
+        self.is_walking = False
+        self.face_direction = FaceDirection.RIGHT
+        self.timer = 0
+        self.current_picture = 0
 
 
-    def update(self, delta_time: float = 1 / 60):
-        pass
+    def update(self, delta_time, keys_pressed):
+        if arcade.key.RIGHT in keys_pressed:
+            self.face_direction = FaceDirection.RIGHT
+            self.center_x += self.speed * delta_time
+        if arcade.key.LEFT in keys_pressed:
+            self.face_direction = FaceDirection.LEFT
+            self.center_x -= self.speed * delta_time
+
+
+        if self.right > SCREEN_WIDTH:
+            self.right = SCREEN_WIDTH
+        if self.left < 0:
+            self.left = 0
+        if self.top > SCREEN_HEIGHT:
+            self.top = SCREEN_HEIGHT
+        if self.bottom < 0:
+            self.bottom = 0
+
+    def update_animation(self, delta_time: float = 1 / 60):
+        # 1. Если пингвин движется (is_walking == True):
+        #    - По таймеру (с задержкой ANIMATION_SPEED) циклически переключайте кадры из списка текстур.
+        #    - Отражайте текстуру по горизонтали (.flip_horizontally()) в зависимости от face_direction.
+        # 2. Если пингвин стоит:
+        #    - Показывайте текстуру покоя, также отражая ее в зависимости от face_direction.
+        if self.is_walking:
+            self.timer += delta_time
+            if self.timer >= ANIMATION_SPEED:
+                self.timer = 0
+                self.current_picture = 0
+            else:
+                self.current_picture = 1
+        else:
+            self.current_picture = 11
+            self.timer = 0
+        new_texture = self.current_picture
+        self.texture = new_texture.flip_horizontally() if self.face_direction == FaceDirection.LEFT else new_texture
 
 
 class MarioGame(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         # Загрузите фоновую текстуру.
-        self.shore = arcade.load_texture('images/mario.png')
-        self.mario = None
+        self.mario = arcade.SpriteList()
 
     def setup(self):
-        self.mario = arcade.SpriteList()
-        mario = Mario(x=SCREEN_WIDTH//2,
-                      y=SCREEN_HEIGHT//2)
-        self.mario.append(mario)
+        self.mario.append(Mario())
+        self.key_pressed = set()
 
 
 
     def on_draw(self):
         self.clear()
-        arcade.draw_texture_rect(self.shore,
+        arcade.draw_texture_rect(self.,
                                  arcade.rect.XYWH(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, SCREEN_WIDTH, SCREEN_HEIGHT))
         self.mario.draw()
 
-    def on_update(self, delta_time):
-        pass
-
-    def on_mouse_motion(self, x, y, dx, dy):
-        pass
-
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.SPACE:
-            self.bottom_y += self.velocity
-        elif key == arcade.key.LEFT:
-            self.left_x -= self.velocity
-        elif key == arcade.key.RIGHT:
-            self.left_x += self.velocity
+        # Добавляйте нажатые клавиши в множество self.keys_pressed.
+        self.keys_pressed.add(key)
+
+    def on_key_release(self, key, modifiers):
+        # Удаляйте отпущенные клавиши из множества self.keys_pressed.
+        self.keys_pressed.remove(key)
 
 
 
