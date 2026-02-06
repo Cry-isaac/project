@@ -14,14 +14,30 @@ class MarioGame(arcade.Window):
         super().__init__(width, height, title)
         self.width = width
         self.height = height
-        arcade.set_background_color(arcade.color.BLACK)
+
+        # Шрифты
         arcade.load_font('fonts/tlpsmb.ttf')
         arcade.load_font('fonts/VMVSegaGenesis-Regular.otf')
         self.custom_font = 'Super Mario Brothers'
         self.custom_font1 = 'VMV Sega Genesis'
 
+        # Фон меню
+        self.background = arcade.load_texture(f"images/background.jpg")
+
+        # Текстура Марио
+        self.mario = arcade.load_texture("images/mario/mario.png")
+        self.mario.width = 100
+        self.mario.height = 100
+
+    def setup(self):
+        pass
+
     def on_draw(self):
         self.clear()
+        arcade.draw_texture_rect(self.background, arcade.rect.XYWH(
+            self.width // 2, self.height // 2, self.width, self.height))
+        arcade.draw_texture_rect(self.mario, arcade.rect.XYWH(
+            self.width // 4, self.height // 6, 50, 50))
         arcade.draw_text('Mario', self.width // 10 * 3, self.height // 3 * 2, arcade.color.WHITE, 84,
                          font_name=self.custom_font)
         arcade.draw_text('Чтобы продолжить, нажмите пробел', self.width // 10 * 2.5, self.height // 2 , arcade.color.WHITE, 12,
@@ -35,7 +51,7 @@ class MarioGame(arcade.Window):
         pass
 
 
-def setup_game(width=1000, height=600, title="Catching fish"):
+def setup_game(width=1200, height=800, title="Mario"):
     game = MarioGame(width, height, title)
     return game
 

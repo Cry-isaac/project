@@ -1,4 +1,5 @@
 import arcade
+from PIL.ImageOps import scale
 from arcade.gui import UIManager, UITextureButton
 from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
@@ -13,7 +14,11 @@ class Player(arcade.Sprite):
         super().__init__()
 
         # Загрузка текстур для анимации ходьбы
-        self.mario = [arcade.load_texture("images/MarioStanding.png"),arcade.load_texture("images/MarioJumping.png")]
+        self.mario = [arcade.load_texture("images/mario/mario.png"), arcade.load_texture("images/mario/mario.png")]
+        self.mario[0].width = 35
+        self.mario[0].height = 35
+        self.mario[1].width = 35
+        self.mario[1].height = 35
         self.animation_timer = 0
         self.current_texture = 0
 
@@ -91,7 +96,7 @@ class MyGUIWindow(arcade.Window):
         self.box_layout_v.add(texture_button3)
 
     def setup(self):
-        self.texture = arcade.load_texture(f"images/backgrounds/backgound.webp")
+        self.texture = arcade.load_texture(f"images/background.jpg")
         self.player = Player()
         self.player.center_x = SCREEN_WIDTH // 6.5
         self.player.center_y = SCREEN_HEIGHT // 6.5
