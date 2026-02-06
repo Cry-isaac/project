@@ -2,6 +2,8 @@ import arcade
 import random
 import math
 
+from arcade.key import SPACE
+
 # Константы
 SCREEN_WIDTH = 1641
 SCREEN_HEIGHT = 601
@@ -46,9 +48,14 @@ class MarioGame(arcade.Window):
                          font_name=self.custom_font1)
         arcade.draw_text("0000", self.width // 6, self.height - 40, arcade.color.WHITE, 12,
                          font_name=self.custom_font1)
+        arcade.draw_text('Последний уровень', self.width // 2, self.height - 20, arcade.color.WHITE, 12,
+                         font_name=self.custom_font1)
+        arcade.draw_text('0-1', self.width // 2, self.height - 40, arcade.color.WHITE, 12,
+                         font_name=self.custom_font1)
 
     def on_key_press(self, key, modifiers):
-        pass
+        if key == SPACE:
+            print('OK')
 
 
 def setup_game(width=1200, height=800, title="Mario"):
