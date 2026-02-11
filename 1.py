@@ -22,7 +22,7 @@ class MarioGame(arcade.Window):
         self.manager.enable()  # Включить, чтоб виджеты работали
 
         # Layout для организации — как полки в шкафу
-        self.anchor_layout = UIAnchorLayout(y=self.height / 10000)  # Центрирует виджеты
+        self.anchor_layout = UIAnchorLayout(y=self.height // 100000)  # Центрирует виджеты
         self.box_layout_v = UIBoxLayout(vertical=True, space_between=10)  # Вертикальный стек
         self.box_layout_h = UIBoxLayout(vertical=False, space_between=10)
 
