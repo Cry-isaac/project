@@ -1,150 +1,89 @@
 import arcade
-from PIL.ImageOps import scale
-from arcade.gui import UIManager, UITextureButton
-from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-SCREEN_TITLE = "Mario"
-SPEED = 2
+SCREEN_TITLE = "Mario-style Game"
 
 
-class Player(arcade.Sprite):
+class MyGame(arcade.Window):
     def __init__(self):
-        super().__init__()
-
-        # Загрузка текстур для анимации ходьбы
-        self.mario = [arcade.load_texture("images/mario/mario.png"), arcade.load_texture("images/mario/mario.png")]
-        self.mario[0].width = 35
-        self.mario[0].height = 35
-        self.mario[1].width = 35
-        self.mario[1].height = 35
-        self.animation_timer = 0
-        self.current_texture = 0
-
-    def update(self, delta_time):
-        # Обновление позиции
-        self.center_x += self.change_x
-        self.center_y += self.change_y
-
-        # Анимация ходьбы
-        self.animation_timer += 1
-        if self.animation_timer >= 10:
-            self.animation_timer = 0
-            self.current_texture = 1 - self.current_texture
-            self.texture = self.mario[self.current_texture]
-
-
-class MyGUIWindow(arcade.Window):
-    def __init__(self, width, height, title):
-        super().__init__(width, height, title)
-
-        # UIManager — сердце GUI
-        self.manager = UIManager()
-        self.manager.enable()  # Включить, чтоб виджеты работали
-
-        # Layout для организации — как полки в шкафу
-        self.anchor_layout = UIAnchorLayout(y=self.height // 3)  # Центрирует виджеты
-        self.box_layout_v = UIBoxLayout(vertical=True, space_between=10)  # Вертикальный стек
-        self.box_layout_h = UIBoxLayout(vertical=False, space_between=10)
-
-
-        # Добавим все виджеты в box, потом box в anchor
-        self.setup_widgets()  # Функция ниже
-
-        self.box_layout_v.add(self.box_layout_h)
-        self.anchor_layout.add(self.box_layout_v)  # Box в anchor
-        self.manager.add(self.anchor_layout)  # Всё в manager
-
-        self.all_sprites = arcade.SpriteList()
-
-    def setup_widgets(self):
-        # Здесь добавим ВСЕ виджеты — по порядку!
-        texture_normal = arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png")
-        texture_hovered = arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png")
-        texture_pressed = arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png")
-        texture_button = UITextureButton(text='Pink Worm',
-                                         texture=texture_normal,
-                                         texture_hovered=texture_hovered,
-                                         texture_pressed=texture_pressed,
-                                         scale=1.0)
-        texture_button.on_click = self.change_hero
-        self.box_layout_v.add(texture_button)
-
-        texture_button1 = UITextureButton(text='Green Worm',
-                                          texture=texture_normal,
-                                          texture_hovered=texture_hovered,
-                                          texture_pressed=texture_pressed,
-                                          scale=1.0)
-        texture_button1.on_click = self.change_hero1
-        self.box_layout_v.add(texture_button1)
-
-        texture_button2 = UITextureButton(text='Frog',
-                                          texture=texture_normal,
-                                          texture_hovered=texture_hovered,
-                                          texture_pressed=texture_pressed,
-                                          scale=1.0)
-        texture_button2.on_click = self.change_hero2
-        self.box_layout_v.add(texture_button2)
-
-        texture_button3 = UITextureButton(text='Mario',
-                                          texture=texture_normal,
-                                          texture_hovered=texture_hovered,
-                                          texture_pressed=texture_pressed,
-                                          scale=1.0)
-        texture_button3.on_click = self.change_hero3
-        self.box_layout_v.add(texture_button3)
+        super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+        self.wall_list = None
+        self.player = None
+        self.physics_engine = None
+        self.view_left = 0
+        self.view_bottom = 0
 
     def setup(self):
-        self.texture = arcade.load_texture(f"images/background.jpg")
-        self.player = Player()
-        self.player.center_x = SCREEN_WIDTH // 6.5
-        self.player.center_y = SCREEN_HEIGHT // 6.5
-        self.all_sprites.append(self.player)
+        map_name = "безымянный.tmx"
+        my_map = arcade.tilemap.load_tilemap(map_name)
 
-    def change_hero(self, event):
-        self.player.hero = 0
+        self.scene = arcade.Scene.from_tilemap(my_map)
 
-    def change_hero1(self, event):
-        self.player.hero = 1
+        self.wall_list = self.scene.get_sprite_list("Walls")
+        self.coin_list = self.scene.get_sprite_list("Coins")
+        self.background_list = self.scene.get_sprite_list("Background")
 
-    def change_hero2(self, event):
-        self.player.hero = 2
+        self.player = arcade.Sprite(":resources:images/animated_characters/male_adventurer/maleAdventurer_idle.png",
+                                    0.5)
+        self.player.center_x = 128
+        self.player.center_y = 128
 
-    def change_hero3(self, event):
-        self.player.hero = 3
+        self.scene.add_sprite("Player", self.player)
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(self.player, self.wall_list, gravity_constant=0.5)
+
+    def on_update(self, delta_time):
+        self.physics_engine.update()
+        changed = False
+
+        left_boundary = self.view_left + SCREEN_WIDTH - SCREEN_WIDTH / 3
+        if self.player.left < left_boundary:
+            self.view_left -= left_boundary - self.player.left
+            changed = True
+
+        right_boundary = self.view_left + SCREEN_WIDTH / 3
+        if self.player.right > right_boundary:
+            self.view_left += self.player.right - right_boundary
+            changed = True
+
+        top_boundary = self.view_bottom + SCREEN_HEIGHT - SCREEN_HEIGHT / 3
+        if self.player.top > top_boundary:
+            self.view_bottom += self.player.top - top_boundary
+            changed = True
+
+        bottom_boundary = self.view_bottom + SCREEN_HEIGHT / 3
+        if self.player.bottom < bottom_boundary:
+            self.view_bottom -= bottom_boundary - self.player.bottom
+            changed = True
+
+        if changed:
+            self.view_left = int(self.view_left)
+            self.view_bottom = int(self.view_bottom)
+            arcade.set_viewport(self.view_left, SCREEN_WIDTH + self.view_left, self.view_bottom,
+                                SCREEN_HEIGHT + self.view_bottom)
 
     def on_draw(self):
         self.clear()
-        arcade.draw_texture_rect(self.texture, arcade.rect.XYWH(
-            self.width // 2, self.height // 2, self.width, self.height))
-        self.manager.draw()  # Рисуй GUI поверх всего
-        self.all_sprites.draw()
-
-    def on_update(self, delta_time: float) -> bool | None:
-        self.all_sprites.update()
+        self.wall_list.draw()
+        self.player.draw()
 
     def on_key_press(self, key, modifiers):
-        if key == arcade.key.LEFT:
-            self.player.change_x = -SPEED
+        if key == arcade.key.UP and self.physics_engine.can_jump():
+            self.player.change_y = 10
+        elif key == arcade.key.LEFT:
+            self.player.change_x = -5
         elif key == arcade.key.RIGHT:
-            self.player.change_x = SPEED
+            self.player.change_x = 5
 
     def on_key_release(self, key, modifiers):
-        if key in [arcade.key.UP, arcade.key.DOWN]:
-            self.player.change_y = 0
         if key in [arcade.key.LEFT, arcade.key.RIGHT]:
             self.player.change_x = 0
 
 
-def setup_game(width=800, height=600, title="Mario"):
-    game = MyGUIWindow(width, height, title)
-    game.setup()
-    return game
-
-
 def main():
-    setup_game(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    game = MyGame()
+    game.setup()
     arcade.run()
 
 
