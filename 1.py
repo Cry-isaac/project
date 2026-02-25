@@ -11,7 +11,7 @@ SCREEN_TITLE = "mario"
 RESULT_COIN = 0
 
 
-class MarioGame(arcade.Window):
+class Menu(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         self.width = width
@@ -117,7 +117,7 @@ class MarioGame(arcade.Window):
 
 
 def setup_game(width=1200, height=800, title="Mario"):
-    game = MarioGame(width, height, title)
+    game = Menu(width, height, title)
     return game
 
 

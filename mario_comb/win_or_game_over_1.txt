@@ -66,3 +66,7 @@ game over, score - 9, heart - 0
 game over, score - 0, heart - 0
 game over, score - 0, heart - 0
 win, score - 10, heart - 3
+game over, score - 2, heart - 0
+win, score - 10, heart - 2
+game over, score - 0, heart - 0
+game over, score - 1, heart - 0

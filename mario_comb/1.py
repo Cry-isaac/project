@@ -2,6 +2,8 @@ import arcade
 import random
 import enum
 from arcade import Text
+from arcade.gui import UIManager, UITextureButton
+from arcade.gui.widgets.layout import UIAnchorLayout, UIBoxLayout
 
 # Константы
 SCREEN_WIDTH = 1280
@@ -293,6 +295,7 @@ class MarioGame(arcade.Window):
         super().__init__(width, height, title)
         self.width = width
         self.height = height
+        self.title = title
         self.world_camera = arcade.camera.Camera2D()
         self.ui_camera = arcade.camera.Camera2D()
         self.background = arcade.load_texture(f"images/i.png")
@@ -323,6 +326,7 @@ class MarioGame(arcade.Window):
         self.win_flag = False
         self.coins_collected = 0
         self.result = False
+        self.menu_flag = True
 
         # Шрифты
         arcade.load_font('fonts/tlpsmb.ttf')
@@ -339,6 +343,33 @@ class MarioGame(arcade.Window):
 
         self.music_background = play_music()
 
+        # UIManager — сердце GUI
+        self.manager = UIManager()
+        self.manager.enable()  # Включить, чтоб виджеты работали
+
+        # Layout для организации — как полки в шкафу
+        self.anchor_layout = UIAnchorLayout(y=self.height // 100000)  # Центрирует виджеты
+        self.box_layout_v = UIBoxLayout(vertical=True, space_between=10)  # Вертикальный стек
+        self.box_layout_h = UIBoxLayout(vertical=False, space_between=10)
+
+        self.box_layout_v.add(self.box_layout_h)
+        self.anchor_layout.add(self.box_layout_v)  # Box в anchor
+        self.manager.add(self.anchor_layout)  # Всё в manager
+
+        # Шрифты
+        arcade.load_font('fonts/tlpsmb.ttf')
+        arcade.load_font('fonts/VMVSegaGenesis-Regular.otf')
+        self.custom_font = 'Super Mario Brothers'
+        self.custom_font1 = 'VMV Sega Genesis'
+
+        # Фон меню
+        self.background_menu = arcade.load_texture(f"images/background.jpg")
+
+        # Текстура Марио
+        self.mario_menu = arcade.load_texture("images/mario.png")
+        self.mario_menu.width = 100
+        self.mario_menu.height = 100
+
     def save_result(self, result):
         with open('win_or_game_over_1.txt', 'a') as file:
             file.write(f"{result}\n")
@@ -346,6 +377,57 @@ class MarioGame(arcade.Window):
     def spawn_mushroom(self):
         new_mushroom = Mushroom()
         self.mushroom.append(new_mushroom)
+
+    def setup_widgets(self):
+        # Здесь добавим ВСЕ виджеты — по порядку!
+        texture_normal = arcade.load_texture(":resources:/gui_basic_assets/button/red_normal.png")
+        texture_hovered = arcade.load_texture(":resources:/gui_basic_assets/button/red_hover.png")
+        texture_pressed = arcade.load_texture(":resources:/gui_basic_assets/button/red_press.png")
+        texture_button = UITextureButton(text='Level 1',
+                                         texture=texture_normal,
+                                         texture_hovered=texture_hovered,
+                                         texture_pressed=texture_pressed,
+                                         scale=1.0)
+        texture_button.on_click = self.level1
+        self.box_layout_v.add(texture_button)
+
+        texture_button1 = UITextureButton(text='Level 2',
+                                          texture=texture_normal,
+                                          texture_hovered=texture_hovered,
+                                          texture_pressed=texture_pressed,
+                                          scale=1.0)
+        texture_button1.on_click = self.level2
+        self.box_layout_v.add(texture_button1)
+
+        texture_button2 = UITextureButton(text='Level 3',
+                                          texture=texture_normal,
+                                          texture_hovered=texture_hovered,
+                                          texture_pressed=texture_pressed,
+                                          scale=1.0)
+        texture_button2.on_click = self.level3
+        self.box_layout_v.add(texture_button2)
+
+        texture_button3 = UITextureButton(text='Level 4',
+                                          texture=texture_normal,
+                                          texture_hovered=texture_hovered,
+                                          texture_pressed=texture_pressed,
+                                          scale=1.0)
+        texture_button3.on_click = self.level4
+        self.box_layout_v.add(texture_button3)
+
+    def level1(self, button):
+        self.screen_title = 'mario'
+        self.show_mario_text = False
+        self.setup()
+
+    def level2(self):
+        pass
+
+    def level3(self):
+        pass
+
+    def level4(self):
+        pass
 
     def spawn_turtle(self):
         new_turtle = Turtle()
@@ -371,22 +453,38 @@ class MarioGame(arcade.Window):
         arcade.draw_texture_rect(self.background, arcade.rect.XYWH(
             self.width // 2, self.height // 2, self.width, self.height))
         if self.show_mario_text:
-            arcade.draw_text('Mario', self.width - 950, self.height // 3 * 2, arcade.color.WHITE, 150,
+            # arcade.draw_text('Mario', self.width - 950, self.height // 3 * 2, arcade.color.WHITE, 150,
+            #                  font_name=self.custom_font)
+            # arcade.draw_text('Чтобы продолжить, нажмите пробел', self.width // 3, self.height // 2, arcade.color.WHITE,
+            #                  12,
+            #                  font_name=self.custom_font1)
+            if self.menu_flag:
+                self.setup_widgets()
+                self.menu_flag = False
+            arcade.draw_texture_rect(self.background_menu, arcade.rect.XYWH(
+                self.width // 2, self.height // 2, self.width, self.height))
+            arcade.draw_texture_rect(self.mario_menu, arcade.rect.XYWH(
+                self.width // 4, self.height // 6, 50, 50))
+            arcade.draw_text('Mario', self.width // 10 * 3.3, self.height // 3 * 2, arcade.color.WHITE, 84,
                              font_name=self.custom_font)
-            arcade.draw_text('Чтобы продолжить, нажмите пробел', self.width // 3, self.height // 2, arcade.color.WHITE,
-                             12,
+            # arcade.draw_text('Чтобы продолжить, нажмите пробел', self.width // 10 * 2.5, self.height // 2 , arcade.color.WHITE, 12,
+            #                  font_name=self.custom_font1)
+            arcade.draw_text('Лучший счёт', self.width // 6, self.height - 20, arcade.color.WHITE, 12,
                              font_name=self.custom_font1)
-
-        self.mario.draw()
-        arcade.draw_texture_rect(self.score_texture, arcade.rect.XYWH(self.width - 100, self.height - 25, 30, 30))
-        arcade.draw_texture_rect(self.heart, arcade.rect.XYWH(self.width - 100, self.height - 60, 30, 30))
-        self.score.text = f"{self.score_number}"
-        self.score_heart.text = f"{self.score_heart_number}"
-        self.score_heart.draw()
-        self.score.draw()
-        self.coins.draw()
-        self.mushroom.draw()
-        self.turtle.draw()  # Рисуем черепаху
+            arcade.draw_text("0000", self.width // 6, self.height - 40, arcade.color.WHITE, 12,
+                             font_name=self.custom_font1)
+            self.manager.draw()  # Рисуй GUI поверх всего
+        else:
+            self.mario.draw()
+            arcade.draw_texture_rect(self.score_texture, arcade.rect.XYWH(self.width - 100, self.height - 25, 30, 30))
+            arcade.draw_texture_rect(self.heart, arcade.rect.XYWH(self.width - 100, self.height - 60, 30, 30))
+            self.score.text = f"{self.score_number}"
+            self.score_heart.text = f"{self.score_heart_number}"
+            self.score_heart.draw()
+            self.score.draw()
+            self.coins.draw()
+            self.mushroom.draw()
+            self.turtle.draw()  # Рисуем черепаху
 
         if self.game_over_flag:
             arcade.draw_lrbt_rectangle_filled(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, arcade.color.BLACK)
